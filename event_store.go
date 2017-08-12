@@ -1,8 +1,8 @@
 package cqrs
 
 import (
-	"github.com/satori/go.uuid"
 	"errors"
+	"github.com/satori/go.uuid"
 )
 
 type EventStore interface {

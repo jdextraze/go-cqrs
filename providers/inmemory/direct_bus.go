@@ -1,27 +1,29 @@
-package memory
+package inmemory
 
-import "github.com/jdextraze/go-cqrs"
+import (
+	"github.com/jdextraze/go-cqrs"
+)
 
-type DirectBus struct {
-	commandFactory cqrs.CommandFactory
+type bus struct {
+	commandFactory  cqrs.CommandFactory
 	commandHandlers map[string]cqrs.CommandHandler
-	eventFactory cqrs.EventFactory
-	eventHandlers map[string][]cqrs.EventHandler
+	eventFactory    cqrs.EventFactory
+	eventHandlers   map[string][]cqrs.EventHandler
 }
 
 func NewBus(
 	commandFactory cqrs.CommandFactory,
 	eventFactory cqrs.EventFactory,
-) *DirectBus {
-	return &DirectBus{
-		commandFactory: commandFactory,
+) *bus {
+	return &bus{
+		commandFactory:  commandFactory,
 		commandHandlers: map[string]cqrs.CommandHandler{},
-		eventFactory: eventFactory,
-		eventHandlers: map[string][]cqrs.EventHandler{},
+		eventFactory:    eventFactory,
+		eventHandlers:   map[string][]cqrs.EventHandler{},
 	}
 }
 
-func (b *DirectBus) RegisterCommandHandler(
+func (b *bus) RegisterCommandHandler(
 	cmd cqrs.Command,
 	handler cqrs.CommandHandler,
 ) error {
@@ -36,7 +38,7 @@ func (b *DirectBus) RegisterCommandHandler(
 	return nil
 }
 
-func (b *DirectBus) RegisterEventHandler(
+func (b *bus) RegisterEventHandler(
 	evt cqrs.Event,
 	handler cqrs.EventHandler,
 ) error {
@@ -51,7 +53,7 @@ func (b *DirectBus) RegisterEventHandler(
 	return nil
 }
 
-func (b *DirectBus) SendCommand(cmd cqrs.Command) error {
+func (b *bus) SendCommand(cmd cqrs.Command) error {
 	name, err := b.commandFactory.GetCommandType(cmd)
 	if err != nil {
 		return err
@@ -60,7 +62,7 @@ func (b *DirectBus) SendCommand(cmd cqrs.Command) error {
 	return handler.HandleCommand(cmd)
 }
 
-func (b *DirectBus) PublishEvent(evt cqrs.DomainEvent) error {
+func (b *bus) PublishEvent(evt *cqrs.DomainEvent) error {
 	name, err := b.eventFactory.GetEventType(evt.Event())
 	if err != nil {
 		return err

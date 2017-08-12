@@ -4,7 +4,11 @@ type AggregateRepository struct {
 	storage EventStore
 }
 
-func (r *AggregateRepository) Load(a AggregateRoot) error {
+func NewAggregateRepository(storage EventStore) *AggregateRepository {
+	return &AggregateRepository{storage}
+}
+
+func (r *AggregateRepository) Load(a *AggregateRoot) error {
 	events, err := r.storage.GetEvents(a.name, a.id)
 	if err != nil {
 		return err
@@ -13,6 +17,6 @@ func (r *AggregateRepository) Load(a AggregateRoot) error {
 	return nil
 }
 
-func (r *AggregateRepository) Save(a AggregateRoot) error {
+func (r *AggregateRepository) Save(a *AggregateRoot) error {
 	return r.storage.SaveEvents(a.name, a.id, a.GetUncommittedChanges())
 }

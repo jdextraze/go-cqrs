@@ -1,18 +1,18 @@
-package memory
+package inmemory
 
 import (
-	"github.com/satori/go.uuid"
 	"github.com/jdextraze/go-cqrs"
+	"github.com/satori/go.uuid"
 )
 
 type eventStore struct {
-	aggregates map[uuid.UUID][]*cqrs.DomainEvent
+	aggregates     map[uuid.UUID][]*cqrs.DomainEvent
 	eventPublisher cqrs.EventPublisher
 }
 
 func NewEventStore(eventPublisher cqrs.EventPublisher) *eventStore {
 	return &eventStore{
-		aggregates: map[uuid.UUID][]*cqrs.DomainEvent{},
+		aggregates:     map[uuid.UUID][]*cqrs.DomainEvent{},
 		eventPublisher: eventPublisher,
 	}
 }

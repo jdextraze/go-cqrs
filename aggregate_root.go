@@ -4,21 +4,21 @@ import (
 	"github.com/satori/go.uuid"
 )
 
-type ApplyEventHandler func(Event)
+type ApplyHandlerFunc func(Event)
 
 type AggregateRoot struct {
 	name    string
 	id      uuid.UUID
 	version int
-	apply   ApplyEventHandler
+	applyer ApplyHandlerFunc
 	changes []*DomainEvent
 }
 
-func NewAggregateRoot(name string, id uuid.UUID, apply ApplyEventHandler) *AggregateRoot {
+func NewAggregateRoot(name string, id uuid.UUID, apply ApplyHandlerFunc) *AggregateRoot {
 	return &AggregateRoot{
-		name: name,
-		id: id,
-		apply: apply,
+		name:    name,
+		id:      id,
+		applyer: apply,
 		version: -1,
 		changes: []*DomainEvent{},
 	}
@@ -32,20 +32,21 @@ func (a *AggregateRoot) Version() int { return a.version }
 
 func (a *AggregateRoot) LoadHistory(events []*DomainEvent) {
 	for _, e := range events {
-		a.apply(e.event)
+		a.applyer(e.event)
 		a.version = e.version
 	}
 }
 
-func (a *AggregateRoot) ApplyChange(event Event) {
-	a.apply(event)
+func (a *AggregateRoot) Apply(event Event) error {
+	a.applyer(event)
 	a.version += 1
 	a.changes = append(a.changes, &DomainEvent{
 		aggregateId: a.id,
-		id: uuid.NewV4(),
-		version: a.version,
-		event: event,
+		id:          uuid.NewV4(),
+		version:     a.version,
+		event:       event,
 	})
+	return nil
 }
 
 func (a *AggregateRoot) GetUncommittedChanges() []*DomainEvent {

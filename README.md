@@ -1,1 +1,3 @@
-# go-cqrs
+# CQRS
+
+A lightweight framework for CQRS project.
