@@ -18,5 +18,9 @@ func (r *AggregateRepository) Load(a *AggregateRoot) error {
 }
 
 func (r *AggregateRepository) Save(a *AggregateRoot) error {
-	return r.storage.SaveEvents(a.name, a.id, a.GetUncommittedChanges())
+	if err := r.storage.SaveEvents(a.name, a.id, a.GetUncommittedChanges()); err != nil {
+		return err
+	}
+	a.MarkChangesAsCommitted()
+	return nil
 }
