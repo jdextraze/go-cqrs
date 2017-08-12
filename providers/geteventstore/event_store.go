@@ -1,10 +1,10 @@
-package ges
+package geteventstore
 
 import (
-	"fmt"
 	"encoding/json"
-	"github.com/jdextraze/go-gesclient/client"
+	"fmt"
 	"github.com/jdextraze/go-cqrs"
+	"github.com/jdextraze/go-gesclient/client"
 	"github.com/satori/go.uuid"
 )
 
@@ -23,7 +23,7 @@ func NewEventStore(
 ) *eventStore {
 	return &eventStore{
 		eventStoreClient: eventStoreClient,
-		eventFactory: eventFactory,
+		eventFactory:     eventFactory,
 	}
 }
 
@@ -78,14 +78,14 @@ func (r *eventStore) SaveEvents(aggregateType string, aggregateId uuid.UUID, dom
 		return nil
 	}
 
-	expectedVersion := int(domainEvents[0].Version) - 1
+	expectedVersion := int(domainEvents[0].Version()) - 1
 	events := make([]*client.EventData, domainEventsLength)
 	for i, domainEvent := range domainEvents {
-		eventType, err := r.eventFactory.GetEventType(domainEvent.Event)
+		eventType, err := r.eventFactory.GetEventType(domainEvent.Event())
 		if err != nil {
 			return err
 		}
-		data, err := json.Marshal(domainEvent.Event)
+		data, err := json.Marshal(domainEvent.Event())
 		if err != nil {
 			return err
 		}
