@@ -33,13 +33,13 @@ func (r *eventStore) GetEvents(aggregateType string, aggregateId uuid.UUID) ([]*
 	start := 0
 
 	for {
-		slice := &client.StreamEventsSlice{}
 		task, err := r.eventStoreClient.ReadStreamEventsForwardAsync(stream, start, eventsReadBatchSize, true, nil)
 		if err != nil {
 			return nil, err
-		} else if err := task.Result(slice); err != nil {
+		} else if err := task.Error(); err != nil {
 			return nil, err
 		}
+		slice := task.Result().(*client.StreamEventsSlice)
 
 		resolvedEvents := slice.Events()
 		nbEvents := len(resolvedEvents)
@@ -92,11 +92,10 @@ func (r *eventStore) SaveEvents(aggregateType string, aggregateId uuid.UUID, dom
 		events[i] = client.NewEventData(domainEvent.Id(), eventType, true, data, []byte(""))
 	}
 
-	result := &client.WriteResult{}
 	task, err := r.eventStoreClient.AppendToStreamAsync(stream, expectedVersion, events, nil)
 	if err != nil {
 		return err
-	} else if err := task.Result(result); err != nil {
+	} else if err := task.Error(); err != nil {
 		return err
 	}
 
